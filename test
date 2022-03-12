@@ -1,0 +1,259 @@
+-- Gui to Lua
+-- Version: 3.2
+
+-- Instances:
+
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local TextLabel = Instance.new("TextLabel")
+local TextButton = Instance.new("TextButton")
+local UIS = game:GetService ('UserInputService')
+local Frame = script.Parent
+
+
+--Properties:
+
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+Frame.Parent = ScreenGui
+Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.Position = UDim2.new(0.144824073, 0, 0.303709745, 0)
+Frame.Size = UDim2.new(0, 432, 0, 218)
+
+TextLabel.Parent = Frame
+TextLabel.BackgroundColor3 = Color3.fromRGB(7, 7, 7)
+TextLabel.Position = UDim2.new(0.00231481483, 0, 0.00917347241, 0)
+TextLabel.Size = UDim2.new(0, 432, 0, 36)
+TextLabel.Font = Enum.Font.Code
+TextLabel.Text = "Spooked's Gui V.1"
+TextLabel.TextColor3 = Color3.fromRGB(58, 27, 69)
+TextLabel.TextSize = 38.000
+
+TextButton.Parent = ScreenGui
+TextButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TextButton.Position = UDim2.new(0.153493121, 0, 0.370944977, 0)
+TextButton.Size = UDim2.new(0, 72, 0, 21)
+TextButton.Font = Enum.Font.SourceSans
+TextButton.Text = "Fly"
+TextButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextButton.TextSize = 22.000
+TextButton.MouseButton1Down:connect(function()
+	local plr = game.Players.LocalPlayer
+	local char = plr.Character or plr.CharacterAdded:Wait()
+	local Humanoid = char:WaitForChild('Humanoid')
+	local FowardAnim = Instance.new('Animation')
+	FowardAnim.AnimationId = 'rbxassetid://4604323138'
+	local PlayFAnim = Humanoid:LoadAnimation(FowardAnim)
+	local BackwardAnim = Instance.new('Animation')
+	BackwardAnim.AnimationId = 'rbxassetid://4607617459'
+	local PlayBAnim = Humanoid:LoadAnimation(BackwardAnim)
+	local HumanoidRootPart = char:WaitForChild('HumanoidRootPart')
+	local UIS = game:GetService('UserInputService')
+	local Mouse = plr:GetMouse()
+
+	local Debris = game:GetService('Debris')
+
+	local Toggle = false
+
+	UIS.InputBegan:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.F then
+			if Toggle == false then -- toggling f key
+				local Jump = Instance.new('BodyVelocity',HumanoidRootPart)
+				Jump.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+				Jump.Velocity = Vector3.new(0,20,0)
+				Debris:AddItem(Jump,.1)
+				wait(.1)
+				HumanoidRootPart.Anchored = true
+				Toggle = true
+			elseif Toggle == true then -- when they press F to untoggle
+				PlayFAnim:Stop()
+				PlayBAnim:Stop()
+				HumanoidRootPart.Anchored = false
+				Toggle = false
+				local Children = HumanoidRootPart:GetChildren()
+				for i, child in pairs (Children) do -- to fix the char if something is still in HumanoidRootPart
+					if child:IsA('BodyVelocity') then
+						child:Destroy()
+					elseif child:IsA('BodyGyro') then
+						child:Destroy()
+					end
+				end
+			end
+		end
+	end)
+
+	UIS.InputBegan:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.W then
+			if Toggle == false then return end -- makes sure to return back if a plr as toggle = false
+			PlayFAnim:Play()
+			HumanoidRootPart.Anchored = false
+			if HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
+				HumanoidRootPart:FindFirstChildOfClass("BodyVelocity"):Destroy()
+			end
+			local Forward = Instance.new("BodyVelocity",HumanoidRootPart)
+			Forward.Name = "ForwardMovement"
+			Forward.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+			local Gyro = Instance.new("BodyGyro",HumanoidRootPart)
+			Gyro.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+			Gyro.D = 100
+			Gyro.P = 10000
+			while Toggle == true do
+				Forward.Velocity = Mouse.Hit.lookVector*150
+				Gyro.CFrame = Mouse.Hit
+				wait()
+			end
+		end
+	end)
+	UIS.InputEnded:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.W then
+			if Toggle == false then return end
+			if HumanoidRootPart:FindFirstChild("ForwardMovement") then
+				HumanoidRootPart.ForwardMovement:Destroy()
+				HumanoidRootPart.Anchored = true
+				PlayFAnim:Stop()
+				if HumanoidRootPart:FindFirstChildOfClass("BodyGyro") then
+					HumanoidRootPart:FindFirstChildOfClass("BodyGyro"):Destroy()
+				end
+			end
+		end
+	end)
+	UIS.InputBegan:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.S then
+			if Toggle == false then return end
+			PlayBAnim:Play()
+			HumanoidRootPart.Anchored = false
+			if HumanoidRootPart:FindFirstChildOfClass("BodyVelocity") then
+				HumanoidRootPart:FindFirstChildOfClass("BodyVelocity"):Destroy()
+			end
+			local Back = Instance.new("BodyVelocity",HumanoidRootPart)
+			Back.Name = "BackMovement"
+			Back.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+			local Gyro = Instance.new("BodyGyro",HumanoidRootPart)
+			Gyro.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+			Gyro.D = 100
+			Gyro.P = 10000
+			while Toggle == true do
+				Back.Velocity = Mouse.Hit.lookVector*-150
+				Gyro.CFrame = Mouse.Hit
+				wait()
+			end
+		end
+	end)
+	UIS.InputEnded:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.S then
+			if Toggle == false then return end
+			PlayBAnim:Stop()
+			if HumanoidRootPart:FindFirstChild("BackMovement") then
+				HumanoidRootPart.BackMovement:Destroy()
+				HumanoidRootPart.Anchored = true
+				if HumanoidRootPart:FindFirstChildOfClass("BodyGyro") then
+					HumanoidRootPart:FindFirstChildOfClass("BodyGyro"):Destroy()
+				end
+			end
+		end
+	end)
+	UIS.InputBegan:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.A then
+			if Toggle == false then return end
+			HumanoidRootPart.Anchored = false
+			if HumanoidRootPart:FindFirstChildOfClass('BodyVelocity') then
+				HumanoidRootPart:FindFirstChildOfClass('BodyVelocity'):Destroy()
+			end
+			local Left = Instance.new('BodyVelocity',HumanoidRootPart)
+			Left.Name = 'LeftMovement'
+			Left.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+			local Gyro = Instance.new('BodyGyro',HumanoidRootPart)
+			Gyro.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+			Gyro.D = 100
+			Gyro.P = 10000
+			while Toggle == true do
+				Left.Velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (0+0)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(-1+0,(0+0)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*150
+				Gyro.CFrame = Mouse.Hit
+				wait()
+			end
+		end
+	end)
+	UIS.InputEnded:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.A then
+			if Toggle == false then return end
+			if HumanoidRootPart:FindFirstChild("LeftMovement") then
+				HumanoidRootPart.LeftMovement:Destroy()
+				HumanoidRootPart.Anchored = true
+				if HumanoidRootPart:FindFirstChildOfClass("BodyGyro") then
+					HumanoidRootPart:FindFirstChildOfClass("BodyGyro"):Destroy()
+				end
+			end
+		end
+	end)
+	UIS.InputBegan:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.D then
+			if Toggle == false then return end
+			HumanoidRootPart.Anchored = false
+			if HumanoidRootPart:FindFirstChildOfClass('BodyVelocity') then
+				HumanoidRootPart:FindFirstChildOfClass('BodyVelocity'):Destroy()
+			end
+			local Right = Instance.new('BodyVelocity',HumanoidRootPart)
+			Right.Name = 'RightMovement'
+			Right.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+			local Gyro = Instance.new('BodyGyro',HumanoidRootPart)
+			Gyro.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+			Gyro.D = 100
+			Gyro.P = 10000
+			while Toggle == true do
+				Right.Velocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (0+0)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(0+1,(0+0)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*150
+				Gyro.CFrame = Mouse.Hit
+				wait()
+			end
+		end
+	end)
+	UIS.InputEnded:Connect(function(Input, Istyping)
+		if Input.KeyCode == Enum.KeyCode.D then
+			if Toggle == false then return end
+			if HumanoidRootPart:FindFirstChild("RightMovement") then
+				HumanoidRootPart.RightMovement:Destroy()
+				HumanoidRootPart.Anchored = true
+				if HumanoidRootPart:FindFirstChildOfClass("BodyGyro") then
+					HumanoidRootPart:FindFirstChildOfClass("BodyGyro"):Destroy()
+				end
+			end
+		end
+	end)
+end)
+
+
+local dragToggle = nil
+local dragSpeed = 0.01 
+local dragStart = nil
+local startpos = nil
+
+local function updateInput(input)
+	local delta = input.Position - dragStart
+	local position = UDim2.new(startpos.X.Scale, startpos.X.Offset + delta.X,
+		startpos.Y.Scale, startpos.Y.Offset + delta .Y)
+	game:GetService('TweenService'):Create(Frame, TweenInfo.new(dragSpeed), {Position = position}):Play()
+end
+
+Frame.InputBegan:Connect(function(input)
+	if (input.UserInputType == Enum.UserInputType.MouseButton1) then
+		print('Click')
+		dragToggle = true
+		dragStart= input.Position
+		startpos = Frame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				print('Release')
+				dragToggle = false
+			end
+		end)
+	end
+end)
+
+UIS. InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		if dragToggle then
+			print('Drag')
+			updateInput(input)
+		end
+	end
+end)
